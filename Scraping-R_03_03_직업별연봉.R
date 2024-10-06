@@ -1,22 +1,41 @@
 
 ##########################################
-## RÀ» ÀÌ¿ëÇÑ À¥½ºÅ©·¹ÀÌÇÎ°ú µ¥ÀÌÅÍºÐ¼® ##
-## (°û±â¿µ, µµ¼­ÃâÆÇ Ã»¶÷)              ## 
+## Rì„ ì´ìš©í•œ ì›¹ìŠ¤í¬ë ˆì´í•‘ê³¼ ë°ì´í„°ë¶„ì„ ##
+## (ê³½ê¸°ì˜, ë„ì„œì¶œíŒ ì²­ëžŒ)              ## 
 ##########################################
 
 ###########################
-## Á¦3Àå ÅØ½ºÆ® ÆÐÅÏ¸ÅÄª ##
+## ì œ3ìž¥ í…ìŠ¤íŠ¸ íŒ¨í„´ë§¤ì¹­ ##
 ###########################
 
 ##############
-## 3.4 »ç·Ê ##
+## 3.4 ì‚¬ë¡€ ##
 ##############
 
-## Á÷¾÷º° ¿¬ºÀ @CNBC
+## ì§ì—…ë³„ ì—°ë´‰ @CNBC
 
 library(httr)
 url <- "https://www.cnbc.com/2020/01/06/the-best-paying-jobs-of-2020-from-us-news-and-world-report.html"
 html <- content(GET(url), type="text")
+
+library(httr)
+html.obj <- GET(url)
+class(html.obj)
+html <- content(html.obj, type="text")
+html <- as(html.obj, "character")
+class(html)
+
+library(xml2)
+html.obj <- read_html(url)
+class(html.obj)
+html <- as(html.obj, "character")
+class(html)
+
+library(curl)
+html.obj <- curl(url)
+class(html.obj)
+html <- readLines(html.obj)
+class(html)
 
 save(html, file="cnbc-salary.rda")
 load("cnbc-salary.rda")
@@ -40,7 +59,7 @@ jobsalary <- tibble(job=job, salary=salary) %>%
   arrange(rank)
 jobsalary
 
-# [±×¸² 3-11]
+# [ê·¸ë¦¼ 3-11]
 library(ggplot2)
 library(scales)
 windows(width=7.0, height=5.5)
