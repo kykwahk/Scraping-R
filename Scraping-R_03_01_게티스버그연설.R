@@ -1,22 +1,25 @@
 
 ##########################################
-## RÀ» ÀÌ¿ëÇÑ À¥½ºÅ©·¹ÀÌÇÎ°ú µ¥ÀÌÅÍºÐ¼® ##
-## (°û±â¿µ, µµ¼­ÃâÆÇ Ã»¶÷)              ## 
+## Rì„ ì´ìš©í•œ ì›¹ìŠ¤í¬ë ˆì´í•‘ê³¼ ë°ì´í„°ë¶„ì„ ##
+## (ê³½ê¸°ì˜, ë„ì„œì¶œíŒ ì²­ëžŒ)              ## 
 ##########################################
 
 ###########################
-## Á¦3Àå ÅØ½ºÆ® ÆÐÅÏ¸ÅÄª ##
+## ì œ3ìž¥ í…ìŠ¤íŠ¸ íŒ¨í„´ë§¤ì¹­ ##
 ###########################
 
 ##############
-## 3.4 »ç·Ê ##
+## 3.4 ì‚¬ë¡€ ##
 ##############
 
-## °ÔÆ¼½º¹ö±× ¿¬¼³ @¿¡ÀÌºê·¯ÇÜ ¸µÄÁ ¿Â¶óÀÎ
+## ê²Œí‹°ìŠ¤ë²„ê·¸ ì—°ì„¤ @ì—ì´ë¸ŒëŸ¬í–„ ë§ì»¨ ì˜¨ë¼ì¸
 
-library(RCurl)
 url <- "http://www.abrahamlincolnonline.org/lincoln/speeches/gettysburg.htm"
-html <- getURL(url)
+
+library(xml2)
+html.obj <- read_html(url)
+class(html.obj)
+html <- as(html.obj, "character")
 html
 class(html)
 
