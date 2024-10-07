@@ -425,6 +425,6 @@ html <- content(get, as="text", encoding="EUC-KR")
 html
 
 html <- content(get, as="text", encoding="UTF-8")
-html.doc <- unlist(str_extract_all(html, "<p>.*?</p>"))[-c(1:3)]
+html.doc <- unlist(str_extract_all(html, "<p>.*?</p>"))
 html.doc
-gsub("<.*?>", "", html.doc)
+gsub("<.*?>", "", html.doc[c(5:8)])
