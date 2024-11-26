@@ -1,18 +1,18 @@
 
 ##########################################
-## RÀ» ÀÌ¿ëÇÑ À¥½ºÅ©·¹ÀÌÇÎ°ú µ¥ÀÌÅÍºĞ¼® ##
-## (°û±â¿µ, µµ¼­ÃâÆÇ Ã»¶÷)              ## 
+## Rì„ ì´ìš©í•œ ì›¹ìŠ¤í¬ë ˆì´í•‘ê³¼ ë°ì´í„°ë¶„ì„ ##
+## (ê³½ê¸°ì˜, ë„ì„œì¶œíŒ ì²­ëŒ)              ## 
 ##########################################
 
 #################
-## Á¦4Àå XPath ##
+## ì œ4ì¥ XPath ##
 #################
 
 ##############
-## 4.5 »ç·Ê ##
+## 4.5 ì‚¬ë¡€ ##
 ##############
 
-## ³ëº§»ó ¼Ò°³ @³ëº§Àç´Ü
+## ë…¸ë²¨ìƒ ì†Œê°œ @ë…¸ë²¨ì¬ë‹¨
 
 library(httr)
 url <- "https://www.nobelprize.org/prizes"
@@ -24,14 +24,14 @@ html <- read_html(url)
 library(XML)
 html.parsed <- htmlParse(html)
 
-# Á¦¸ñ
+# ì œëª©
 xpathSApply(doc=html.parsed, path="//article[@class='content']//h4", 
             fun=xmlValue)
 header <- xpathSApply(doc=html.parsed, path="//article[@class='content']//h4", 
                       fun=xmlValue, trim=TRUE)
 header
 
-# ³»¿ë
+# ë‚´ìš©
 content <- xpathSApply(doc=html.parsed, path="//article[@class='content']//p", 
                        fun=xmlValue)
 content
@@ -45,23 +45,23 @@ content <- xpathSApply(doc=html.parsed,
   str_c(collapse=" ")
 content
 
-# ÁÖ¿ä Åë°è
-facts <- xpathSApply(doc=html.parsed, path="//ul[@class='factlist']/li", 
+# ì£¼ìš” í†µê³„
+facts <- xpathSApply(doc=html.parsed, path="//ul[@class='factlist wp-block-list']/li", 
                      fun=xmlValue)
 facts
 
 library(tidyr)
-separate(tibble(facts=facts), col=facts, sep=": ", 
-         into=c("category", "statistics"), convert=TRUE)
+separate_wider_delim(tibble(facts=facts), cols=facts, delim=": ", 
+                     names=c("category", "statistics"))
 
-facts <- xpathSApply(doc=html.parsed, path="//ul[@class='factlist']/li", 
+facts <- xpathSApply(doc=html.parsed, path="//ul[@class='factlist wp-block-list']/li", 
                      fun=xmlValue) %>% 
   tibble(facts=.) %>% 
-  separate(col=facts, sep=": ", 
-           into=c("category", "statistics"), convert=TRUE)
+  separate_wider_delim(cols=facts, delim=": ", 
+                       names=c("category", "statistics"))
 facts
 
-# ¸Ş´Ş ÀÌ¹ÌÁö
+# ë©”ë‹¬ ì´ë¯¸ì§€
 medal <- xpathSApply(html.parsed, 
                      path="//div[@class='nobel__blocks--content']/section[1]/div[1]", 
                      fun=xmlGetAttr, "data-bgset")
