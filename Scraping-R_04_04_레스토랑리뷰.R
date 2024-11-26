@@ -16,7 +16,7 @@
 
 library(httr)
 library(XML)
-url <- "https://www.opentable.com/planet-hollywood-times-square"
+url <- "https://www.opentable.com/tavern-on-the-green"
 html <- GET(url) 
 html.parsed <- htmlParse(html)
 library(tidyverse)
@@ -34,7 +34,7 @@ author
 
 # 작성 일자
 date <- xpathSApply(html.parsed, 
-                    "//ol[@id='restProfileReviewsContent']/li/section[2]/section[1]/p", 
+                    "//ol[@id='restProfileReviewsContent']/li/div[1]/div[1]/p", 
                     xmlValue)
 date
 
@@ -66,43 +66,44 @@ Sys.setlocale()
 
 # 리뷰글
 review <- xpathSApply(html.parsed, 
-                      "//ol[@id='restProfileReviewsContent']/li/section[2]/div/span[1]", 
+                      "//ol[@id='restProfileReviewsContent']/li/div[1]/div[2]/span[1]", 
                       xmlValue)
 review
 
 # 평점
-food <- xpathSApply(html.parsed, 
-                    "//ol[@id='restProfileReviewsContent']/li/section[2]/span[2]", 
+overall <- xpathSApply(html.parsed, 
+                    "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[1]/span", 
                     xmlValue) %>% 
+  as.numeric()
+overall
+
+food <- xpathSApply(html.parsed, 
+                       "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[2]/span", 
+                       xmlValue) %>% 
   as.numeric()
 food
 
 service <- xpathSApply(html.parsed, 
-                       "//ol[@id='restProfileReviewsContent']/li/section[2]/span[4]", 
-                       xmlValue) %>% 
+                        "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[3]/span", 
+                        xmlValue) %>% 
   as.numeric()
 service
 
 ambience <- xpathSApply(html.parsed, 
-                        "//ol[@id='restProfileReviewsContent']/li/section[2]/span[6]", 
-                        xmlValue) %>% 
+                       "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[4]/span", 
+                       xmlValue) %>% 
   as.numeric()
 ambience
 
-overall <- xpathSApply(html.parsed, 
-                       "//ol[@id='restProfileReviewsContent']/li/section[2]/span[8]", 
-                       xmlValue) %>% 
-  as.numeric()
-overall
-
 # 총페이지 개수 
-total.pages <- xpathSApply(html.parsed, 
-                           "//footer[@data-test='reviews-pagination']//ul/li[last()]", 
+total.reviews <- xpathSApply(html.parsed, 
+                           "//section[@id='reviews']/section/header/div/h2", 
                            xmlValue) %>% 
-  as.numeric()
+  parse_number()
+total.pages <- ceiling(total.reviews/10)
 total.pages
 
-# 오픈테이블 리뷰 데이터 추출 함수 - 현재 버전(2023.4.25)
+# 오픈테이블 리뷰 데이터 추출 함수 - 현재 버전(2024.11.26)
 opentableReview <- function(baseurl, n=NULL) {
   library(tidyverse)
   library(lubridate)
@@ -111,10 +112,11 @@ opentableReview <- function(baseurl, n=NULL) {
   html <- GET(baseurl)
   html.parsed <- htmlParse(html)
   if (is.null(n)) {
-    total.pages <- xpathSApply(html.parsed, 
-                               "//footer[@data-test='reviews-pagination']//ul/li[last()]", 
-                               xmlValue) %>% 
-      as.numeric()
+    total.reviews <- xpathSApply(html.parsed, 
+                                 "//section[@id='reviews']/section/header/div/h2", 
+                                 xmlValue) %>% 
+      parse_number()
+    total.pages <- ceiling(total.reviews/10)
     n <- total.pages
   }
   opentable.review <- tibble()
@@ -139,28 +141,28 @@ opentableReview <- function(baseurl, n=NULL) {
                           "//ol[@id='restProfileReviewsContent']/li/section[1]/p[1]", 
                           xmlValue)
     date <- xpathSApply(html.parsed, 
-                        "//ol[@id='restProfileReviewsContent']/li/section[2]/section[1]/p", 
+                        "//ol[@id='restProfileReviewsContent']/li/div[1]/div[1]/p", 
                         xmlValue) %>% 
       map_chr(dateExtract) %>% 
       as.Date()
     review <- xpathSApply(html.parsed, 
-                          "//ol[@id='restProfileReviewsContent']/li/section[2]/div/span[1]", 
+                          "//ol[@id='restProfileReviewsContent']/li/div[1]/div[2]/span[1]", 
                           xmlValue)
+    overall <- xpathSApply(html.parsed, 
+                           "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[1]/span", 
+                           xmlValue) %>% 
+      as.numeric()
     food <- xpathSApply(html.parsed, 
-                        "//ol[@id='restProfileReviewsContent']/li/section[2]/span[2]", 
+                        "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[2]/span", 
                         xmlValue) %>% 
       as.numeric()
     service <- xpathSApply(html.parsed, 
-                           "//ol[@id='restProfileReviewsContent']/li/section[2]/span[4]", 
+                           "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[3]/span", 
                            xmlValue) %>% 
       as.numeric()
     ambience <- xpathSApply(html.parsed, 
-                            "//ol[@id='restProfileReviewsContent']/li/section[2]/span[6]", 
+                            "//ol[@id='restProfileReviewsContent']/li/div[1]/ol/li[4]/span", 
                             xmlValue) %>% 
-      as.numeric()
-    overall <- xpathSApply(html.parsed, 
-                           "//ol[@id='restProfileReviewsContent']/li/section[2]/span[8]", 
-                           xmlValue) %>% 
       as.numeric()
     if (length(date) > 0 ) {
       opentable.r <- tibble(name=name, author=author, date=date, review=review, 
@@ -176,18 +178,11 @@ opentableReview <- function(baseurl, n=NULL) {
   return(opentable.review)
 }
 
-baseurl <- "https://www.opentable.com/planet-hollywood-times-square"
-opentable.planet <- opentableReview(baseurl=baseurl, n=10)
-opentable.planet
-
-baseurl <- "https://www.opentable.com/planet-hollywood-times-square"
-opentable.planet <- opentableReview(baseurl=baseurl)
-opentable.planet
-
-save(opentable.planet, file="opentable-planet.rda")
-load("opentable-planet.rda")
-
 baseurl <- "https://www.opentable.com/tavern-on-the-green"
+opentable.tavern <- opentableReview(baseurl=baseurl, n=30)
+opentable.tavern
+View(opentable.tavern)
+
 opentable.tavern <- opentableReview(baseurl=baseurl)
 opentable.tavern
 
@@ -195,7 +190,7 @@ save(opentable.tavern, file="opentable-tavern.rda")
 load("opentable-tavern.rda")
 
 # 시각화 및 분석
-opentable.review <- opentable.planet
+opentable.review <- opentable.tavern
 map_dfc(select(opentable.review, starts_with("rating")), table) %>% 
   rownames_to_column(var="rating.category") 
 
@@ -214,7 +209,7 @@ ggplot(ratings, aes(x=name, y=value, fill=rating.category)) +
   geom_bar(position=position_dodge2(width=-0.9), color="dimgray", stat="identity") +
   scale_fill_brewer(name="Rating", palette="Blues") +
   labs(x="", y="Number of Ratings", 
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Distribution of rating",
        caption="Source: OpenTable") +
   theme_bw() +
@@ -234,7 +229,7 @@ ggplot(opentable.review, aes(x=nchar(review))) +
   scale_x_continuous(labels=comma) +
   scale_y_continuous(labels=comma) +
   labs(x="Review Length (Number of Review Characters)", y="Frequency",
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Distribution of review length",
        caption="Source: OpenTable") +
   theme_gray() + 
@@ -252,7 +247,7 @@ ggplot(filter(opentable.review, nchar(review) < 1000),
   scale_x_discrete(breaks=c(1, 2, 3, 4, 5)) +
   scale_y_continuous(labels=comma) +
   labs(x="Rating", y="Review Length",
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Distribution of review length by rating",
        caption="Source: OpenTable") +
   theme_gray() +
@@ -304,7 +299,7 @@ ggplot(opentable.sent.review, aes(x=as.factor(rating.overall), y=score_avg)) +
   geom_boxplot(fill="lavenderblush", color="black") +
   scale_x_discrete(breaks=c(1, 2, 3, 4, 5)) +
   labs(x="Rating", y="Average Sentiment Score of Words",
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Distribution of average sentiment score by review rating",
        caption="Source: OpenTable") +
   theme_gray() +
@@ -329,7 +324,7 @@ ggplot(opentable.sent.word, aes(x=as.factor(value), y=rating_avg)) +
   geom_boxplot(fill="aquamarine", color="black") +
   scale_y_continuous(breaks=c(1, 2, 3, 4, 5), limits=c(1, 5)) +
   labs(x="Sentiment Score of Words", y="Average Rating of Reviews",
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Distribution of average review rating by sentimet score of word",
        caption="Source: OpenTable") +
   theme_gray() +
@@ -372,7 +367,7 @@ ggplot(filter(opentable.sent.review, sentiment > outlier[1], sentiment < outlier
   scale_x_discrete(breaks=c(1:5)) +
   scale_y_continuous(breaks=seq(from=trunc(outlier[1]), to=trunc(outlier[2]), by=2)) +
   labs(x="Rating", y="Sentiment Score (# of positives - # of negatives)", 
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Distribution of sentiment score by review rating",
        caption="Source: OpenTable") +
   theme_minimal() +
@@ -408,7 +403,7 @@ ggplot(opentable.sent.words,
         plot.title=element_text(face="bold"),
         axis.text=element_text(face="bold", size=10)) +
   labs(x=NULL, y="Count",
-       title="Review of Planet Hollywood",
+       title="Review of Tavern on the Green",
        subtitle="Top words contributing to sentiment",
        caption="Source: OpenTable") +
   coord_flip()
