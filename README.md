@@ -1,7 +1,7 @@
 # R을 이용한 웹스크레이핑과 데이터분석
-📘『R을 이용한 웹스크레이핑과 데이터분석』 (곽기영, 도서출판 청람) | https://product.kyobobook.co.kr/detail/S000000907353   
-
 📺 YouTube 『곽기영』 채널 | https://www.youtube.com/곽기영   
+
+📘『R을 이용한 웹스크레이핑과 데이터분석』 (곽기영, 도서출판 청람) | https://product.kyobobook.co.kr/detail/S000000907353   
 
 Chapter 01 웹스크레이핑 개요   
 
